@@ -4,8 +4,13 @@ namespace app\Service;
 
 
 use app\Dto\GroupDto;
+use app\Dto\GroupFilterDto;
+use app\Dto\StudentDto;
 use app\Entity\GroupEntity;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 class GroupService
 {
@@ -15,42 +20,85 @@ class GroupService
     {
     }
 
-    public function getGroups(GroupDto $dto): array
+    /**
+     * Получает массив групп из БД по фильтрам.
+     *
+     * @param GroupFilterDto|null $dto
+     * @return array
+     * @throws Exception
+     */
+    public function get(GroupFilterDto $dto = null): array
     {
-        $criteria = $dto->GetSetProperties();
-
-        $orderBy = ['name' => 'ASC'];
-
-        if (isset($criteria)) {
-            $entities = $this->entityManager->getRepository(GroupEntity::class)->findBy($criteria, $orderBy);
-        } else {
-            $entities = $this->entityManager->getRepository(GroupEntity::class)->findBy([], $orderBy);
-        }
-
+        $entities = $this->entityManager->getRepository(GroupEntity::class)->getGroupsByDto($dto);
         return GroupDto::formFromArray($entities);
     }
 
-    public function createGroup(GroupDto $dto): void
+    /**
+     * Сохраняет группу в БД.
+     *
+     * @param GroupDto $dto
+     * @return void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    function save(GroupDto $dto): void
     {
-        $entity = new GroupEntity();
-
-        $entity->updateFromDto($dto);
-        $this->entityManager->persist($entity);
+        if (isset($dto->id)) {
+            $entity = $this->entityManager->getRepository(GroupEntity::class)->find($dto->id);
+            $entity->updateFromDto($dto);
+        } else {
+            $entity = new GroupEntity();
+            $entity->updateFromDto($dto);
+            $this->entityManager->persist($entity);
+        }
 
         $this->entityManager->flush();
     }
 
-    function updateGroup(GroupDto $dto): void
-    {
-        $student = $this->entityManager->getRepository(GroupEntity::class)->find($dto->id);
-        $student->updateFromDto($dto);
-        $this->entityManager->flush();
-    }
-
-    public function deleteGroup(int $id): void
+    /**
+     * Удаляет группу из БД по id.
+     *
+     * @param int $id
+     * @return void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function delete(int $id): void
     {
         $entity = $this->entityManager->getRepository(GroupEntity::class)->find($id);
         $this->entityManager->remove($entity);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Возвращает массив студентов группы по id группы.
+     *
+     * @param int $id
+     * @return array
+     */
+    public function getStudents(int $id): array
+    {
+        $entity = $this->entityManager->getRepository(GroupEntity::class)->find($id);
+        return StudentDto::formFromArray($entity->getStudents()->toArray());
+    }
+
+    /**
+     * Удаляет всех студентов группы по id группы.
+     *
+     * @param int $id
+     * @return void
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function deleteStudents(int $id)
+    {
+        $entity = $this->entityManager->getRepository(GroupEntity::class)->find($id);
+
+        foreach ($entity->getStudents() as $student) {
+            $this->entityManager->remove($student);
+        }
+
         $this->entityManager->flush();
     }
 }

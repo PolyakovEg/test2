@@ -11,4 +11,4 @@ ConsoleRunner::run(
     new SingleManagerProvider($entityManager),
     $commands
 );
-//  mkdir -p -m=777 ./var/cache && php cli-config.php orm:generate-proxies ./var/cache todo удалить
+//  mkdir -p -m=777 ./var/cache && php cli-config.php orm:generate-proxies ./var/cache

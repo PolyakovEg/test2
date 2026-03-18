@@ -5,9 +5,12 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Dotenv\Dotenv;
+use Knp\Snappy\Pdf;
 use Monolog\Handler\FirePHPHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -54,6 +57,17 @@ $logger->pushHandler(new StreamHandler('/var/log/projects/test2/logs.txt'));
 $logger->pushHandler(new FirePHPHandler());
 
 Container::set(Logger::class, $logger);
+
+
+$loader = new FilesystemLoader('./Templates');
+$twig = new Environment($loader, [
+   // 'cache' => '/var/cache/test2_cache',
+
+]);
+
+Container::set(Environment::class, $twig);
+
+Container::set(Pdf::class, new Pdf('/usr/bin/wkhtmltopdf'));
 
 /**
  * Возвращает строку, отформатированную, как имя собственное.
@@ -107,3 +121,5 @@ function throwServerError(string $error, int $code = 500): void
     http_response_code($code);
     echo $error;
 }
+
+//todo Undefined array key "group"

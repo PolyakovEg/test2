@@ -25,5 +25,3 @@ try {
     throwServerError($message);
     $logger->log(Level::Error, $message);
 }
-
-// TODO: почитать про PSR + сделать все по PSR

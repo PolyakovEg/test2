@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\SequenceGenerator;
 use Doctrine\ORM\Mapping\Table;
@@ -19,7 +20,7 @@ class StudentEntity
     #[Id]
     #[Column(name: 'ID', type: Types::INTEGER)]
     #[GeneratedValue(strategy: 'SEQUENCE')]
-    #[SequenceGenerator(sequenceName: "KC2203_25.PKSEQUENCE")]
+    #[SequenceGenerator(sequenceName: "KP2411_21.PKSEQUENCE")]
     private int $id;
 
     #[Column(name: 'FIRST_NAME', type: Types::STRING)]
@@ -37,9 +38,9 @@ class StudentEntity
     #[Column(name: 'IS_LIVE_IN_DORMITORY', type: Types::BOOLEAN)]
     private bool $isLiveInDormitory;
 
-    #[Column(name: 'GROUP_ID', type: Types::INTEGER)]
     #[ManyToOne(targetEntity: GroupEntity::class, inversedBy: 'students')]
-    private int $groupId;
+    #[JoinColumn(referencedColumnName: 'ID', fieldName: 'GROUP_ID')]
+    private GroupEntity $group;
 
     public function getId(): int
     {
@@ -101,14 +102,14 @@ class StudentEntity
         return $this;
     }
 
-    public function getGroupId(): int
+    public function getGroup(): GroupEntity
     {
-        return $this->groupId;
+        return $this->group;
     }
 
-    public function setGroupId(int $groupId): StudentEntity
+    public function setGroup(GroupEntity $group): StudentEntity
     {
-        $this->groupId = $groupId;
+        $this->group = $group;
         return $this;
     }
 
@@ -124,7 +125,7 @@ class StudentEntity
         $this->setLastName($dto->lastName);
         $this->setPatronymic($dto->patronymic);
         $this->setEmail($dto->email);
-        $this->setGroupId($dto->groupId);
+        $this->setGroup($dto->group);
         $this->setIsLiveInDormitory($dto->isLiveInDormitory);
     }
 }

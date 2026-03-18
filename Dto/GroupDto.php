@@ -3,15 +3,17 @@
 namespace app\Dto;
 
 use app\Entity\GroupEntity;
+use DateTime;
 use Exception;
 
 class GroupDto
 {
-    public ?int $id;
-    public ?string $name;
-    public ?string $studyStartDate;
-    public ?int $specializationId;
-    public ?string $formOfEducation;
+    public ?int $id = null;
+    public ?string $name = null;
+    public ?string $studyStartDate = null;
+    public ?int $specializationId = null;
+    public ?string $formOfEducation = null;
+    public ?array $students = null;
 
     /**
      * Создает массив DTO из массива групп.
@@ -46,30 +48,8 @@ class GroupDto
         $dto->studyStartDate = date_format($group->getStudyStartDate(), 'd.m.Y') ?: null;
         $dto->specializationId = $group->getSpecializationId();
         $dto->formOfEducation = $group->getFormOfEducation();
+        $dto->students = $group->getStudentsArray();
 
         return $dto;
-    }
-
-    /**
-     * Возвращает проинициальзированные свойтва.
-     *
-     * @return array|null
-     * @throws Exception
-     */
-    public function GetSetProperties(): array|null
-    {
-        $properties = null;
-
-        foreach ($this as $key => $value) {
-            if (isset($value)) {
-                $properties[$key] = $value;
-            }
-        }
-
-        if(isset($properties['studyStartDate'])) {
-            $properties['studyStartDate'] = $properties['studyStartDate'] ? new \DateTime($properties['studyStartDate']) : null;
-        }
-
-        return $properties;
     }
 }

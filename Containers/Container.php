@@ -3,26 +3,46 @@
 namespace app\Containers;
 
 use ReflectionClass;
+use ReflectionException;
 
 class Container
 {
     private static array $objects = [];
 
+    /**
+     * @param string $id
+     * @return bool
+     */
     public static function has(string $id): bool
     {
         return isset($self::objects[$id]) || class_exists($id);
     }
 
+    /**
+     * @param string $id
+     * @return mixed
+     * @throws ReflectionException
+     */
     public static function get(string $id): mixed
     {
         return self::$objects[$id] ?? self::prepareObject($id);
     }
 
+    /**
+     * @param string $id
+     * @param $value
+     * @return void
+     */
     public static function set(string $id, $value): void
     {
         self::$objects[$id] = $value;
     }
 
+    /**
+     * @param string $class
+     * @return mixed
+     * @throws ReflectionException
+     */
     private static function prepareObject(string $class): object
     {
         $classReflector = new ReflectionClass($class);

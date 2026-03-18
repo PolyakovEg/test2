@@ -3,8 +3,12 @@
 namespace app\Controller;
 
 use app\Dto\StudentDto;
+use app\Dto\StudentFilterDto;
 use app\Facade\StudentFacade;
 use app\Utils\DtoBuilder;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 class StudentController
 {
@@ -14,29 +18,39 @@ class StudentController
     {
     }
 
-    public function getStudents(array $params): array|object
+    /**
+     * @param array $params
+     * @return array
+     * @throws Exception
+     */
+    public function get(array $params): array
     {
-        $dto = DtoBuilder::formFromRequest(StudentDto::class, $params);
-
-        return $this->facade->getStudents($dto);
+        $dto = DtoBuilder::formFromRequest(StudentFilterDto::class, $params);
+        return $this->facade->get($dto);
     }
 
-    public function createStudent(array $params): void
+    /**
+     * @param array $params
+     * @return void
+     * @throws Exception
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function save(array $params): void
     {
         $dto = DtoBuilder::formFromRequest(StudentDto::class, $params);
-
-        $this->facade->createStudent($dto);
+        $this->facade->save($dto);
     }
 
-    public function updateStudent(array $params): void
+    /**
+     * @param array $params
+     * @return void
+     * @throws Exception
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function delete(array $params): void
     {
-        $dto = DtoBuilder::formFromRequest(StudentDto::class, $params);
-
-        $this->facade->updateStudent($dto);
-    }
-
-    public function deleteStudent(array $params): void
-    {
-        $this->facade->deleteStudent($params['id']);
+        $this->facade->delete($params['id']);
     }
 }

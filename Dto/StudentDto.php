@@ -2,17 +2,19 @@
 
 namespace app\Dto;
 
+use app\Entity\GroupEntity;
 use app\Entity\StudentEntity;
 
 class StudentDto
 {
-    public ?int $id;
-    public ?string $firstName;
-    public ?string $lastName;
-    public ?string $patronymic;
-    public ?string $email;
-    public ?bool $isLiveInDormitory;
-    public ?int $groupId;
+    public ?int $id = null;
+    public ?string $firstName = null;
+    public ?string $lastName = null;
+    public ?string $patronymic = null;
+    public ?string $email = null;
+    public ?bool $isLiveInDormitory = null;
+    public ?int $groupId = null;
+    public ?GroupEntity $group = null;
 
     /**
      * Возвращает массив студентов в виде DTO.
@@ -20,7 +22,7 @@ class StudentDto
      * @param array $students
      * @return array
      */
-    public static function formDtoFromArray(array $students): array
+    public static function formFromArray(array $students): array
     {
         $dto = [];
 
@@ -49,26 +51,16 @@ class StudentDto
         $dto->patronymic = $student->getPatronymic();
         $dto->email = $student->getEmail();
         $dto->isLiveInDormitory = $student->getIsLiveInDormitory();
-        $dto->groupId = $student->getGroupId();
+        $dto->groupId = $student->getGroup()->getId();
 
         return $dto;
     }
 
     /**
-     * Возвращает проинициальзированные свойтва.
-     *
-     * @return array|null
+     * @return string
      */
-    public function GetSetProperties(): array|null
+    public function getFullName(): string
     {
-        $properties = null;
-
-        foreach ($this as $key => $value) {
-            if (isset($value)) {
-                $properties[$key] = $value;
-            }
-        }
-
-        return $properties;
+        return "$this->lastName $this->firstName $this->patronymic";
     }
 }

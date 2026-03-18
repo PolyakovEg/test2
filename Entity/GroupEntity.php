@@ -3,7 +3,10 @@
 namespace app\Entity;
 
 use app\Dto\GroupDto;
+use app\Dto\StudentDto;
+use app\Repository\GroupEntityRepository;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping\Column;
@@ -13,15 +16,16 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\SequenceGenerator;
 use Doctrine\ORM\Mapping\Table;
+use Exception;
 
-#[Entity]
+#[Entity (repositoryClass: GroupEntityRepository::class)]
 #[Table(name: 'GROUPS')]
 class GroupEntity
 {
     #[Id]
     #[Column(name: 'ID', type: Types::INTEGER)]
     #[GeneratedValue(strategy: 'SEQUENCE')]
-    #[SequenceGenerator(sequenceName: "KC2203_25.PKSEQUENCE")]
+    #[SequenceGenerator(sequenceName: "KP2411_21.GROUPPKSEQUENCE")]
     private int $id;
 
     #[Column(name: 'NAME', type: Types::STRING)]
@@ -37,8 +41,13 @@ class GroupEntity
     private string $formOfEducation;
 
     /** @var Collection<int, StudentEntity> An ArrayCollection of StudentEntity objects. */
-    #[OneToMany(targetEntity: StudentEntity::class, mappedBy: 'groupId')]
+    #[OneToMany(targetEntity: StudentEntity::class, mappedBy: 'group')]
     private Collection $students;
+
+    public function __construct()
+    {
+        $this->students = new ArrayCollection();
+    }
 
     public function getId(): int
     {
@@ -85,12 +94,48 @@ class GroupEntity
         $this->formOfEducation = $formOfEducation;
     }
 
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
+    public function setStudents(Collection $students): GroupEntity
+    {
+        $this->students = $students;
+        return $this;
+    }
+
+    /**
+     * Возвращает массив студентов в алфавитном порядке.
+     *
+     * @return array
+     */
+    public function getStudentsArray(): array
+    {
+        $result = [];
+
+        foreach ($this->getStudents() as $student) {
+            $result[] = StudentDto::formFromEntity($student);
+        }
+
+        usort($result, function ($student1, $student2) {
+            /** @var $student1 StudentDto */
+            /** @var $student2 StudentDto */
+
+            $cmpByLastName = strcmp($student1->lastName, $student2->lastName);
+
+            return $cmpByLastName == 0 ? strcmp($student1->firstName, $student2->firstName) : $cmpByLastName;
+        });
+
+        return $result;
+    }
+
     /**
      * Обновляет сущность с помощью DTO.
      *
      * @param GroupDto $dto
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateFromDto(GroupDto $dto): void
     {

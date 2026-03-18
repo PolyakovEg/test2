@@ -3,71 +3,96 @@
 namespace app\Facade;
 
 use app\Dto\GroupDto;
-use app\Dto\StudentDto;
+use app\Dto\GroupFilterDto;
 use app\Service\GroupService;
-use app\Service\StudentService;
-use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\ORMException;
+use Exception;
+use Monolog\Level;
+use Monolog\Logger;
 
 class GroupFacade
 {
     public function __construct(
         private readonly GroupService   $groupService,
-        private readonly StudentService $studentService
+        private readonly Logger         $logger
     )
     {
     }
 
-    function getGroups(GroupDto $dto): array|object
+    /**
+     * @param GroupFilterDto $dto
+     * @return array
+     * @throws Exception
+     */
+    function get(GroupFilterDto $dto): array
     {
         try {
-            return $this->groupService->getGroups($dto);
+            return $this->groupService->get($dto);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при получении групп.');
         }
     }
 
-    function getStudents(StudentDto $dto): array|object
+    /**
+     * @param int $id
+     * @return array
+     * @throws Exception
+     */
+    function getStudents(int $id): array
     {
         try {
-            return $this->studentService->getStudents($dto);
+            return $this->groupService->getStudents($id);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при получении студентов группы.');
         }
     }
 
-    public function createGroup(GroupDto $dto): void
+    /**
+     * @param GroupDto $dto
+     * @return void
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function save(GroupDto $dto): void
     {
         try {
-            $this->groupService->createGroup($dto);
+            $this->groupService->save($dto);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при сохранении группы.');
         }
     }
 
-    public function updateGroup(GroupDto $dto): void
+    /**
+     * @param int $id
+     * @return void
+     * @throws ORMException
+     * @throws Exception
+     */
+    public function delete(int $id): void
     {
         try {
-            $this->groupService->updateGroup($dto);
+            $this->groupService->delete($id);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при удалении группы.');
         }
     }
 
-    public function deleteGroup(int $id): void
-    {
-        try {
-            $this->groupService->deleteGroup($id);
-        } catch (Exception $exception) {
-            throw $exception;
-        }
-    }
-
+    /**
+     * @param int $id
+     * @return void
+     * @throws ORMException
+     */
     public function deleteStudents(int $id): void
     {
         try {
-            $this->studentService->deleteStudentsOfGroup($id);
+            $this->groupService->deleteStudents($id);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при удалении студентов группы.');
         }
     }
 }

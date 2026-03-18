@@ -3,53 +3,70 @@
 namespace app\Facade;
 
 use app\Dto\StudentDto;
+use app\Dto\StudentFilterDto;
 use app\Service\StudentService;
-use Doctrine\DBAL\Exception;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 use Monolog\Level;
 use Monolog\Logger;
 
 class StudentFacade
 {
-    public function __construct( //todo отфармотировать конструкторы
-        private readonly StudentService $studentService
+    public function __construct(
+        private readonly StudentService $studentService,
+        private readonly Logger         $logger
     )
     {
     }
 
-    public function getStudents(StudentDto $dto): array|object
+    /**
+     * @param StudentFilterDto $dto
+     * @return array
+     * @throws Exception
+     */
+    public function get(StudentFilterDto $dto): array
     {
         try {
-            return $this->studentService->getStudents($dto);
+            return $this->studentService->get($dto);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при получении студентов.');
         }
 
     }
 
-    public function createStudent(StudentDto $dto): void
+    /**
+     * @param StudentDto $dto
+     * @return void
+     * @throws Exception
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function save(StudentDto $dto): void
     {
         try {
-            $this->studentService->createStudent($dto);
+            $this->studentService->save($dto);
         } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при сохранении студента.');
         }
     }
 
-    public function updateStudent(StudentDto $dto): void
+    /**
+     * @param int $id
+     * @return void
+     * @throws Exception
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function delete(int $id): void
     {
         try {
-            $this->studentService->updateStudent($dto);
+            $this->studentService->delete($id);
         } catch (Exception $exception) {
-            throw $exception;
-        }
-    }
-
-    public function deleteStudent(int $id): void
-    {
-        try {
-            $this->studentService->deleteStudent($id);
-        } catch (Exception $exception) {
-            throw $exception;
+            $this->logger->log(Level::Error, $exception->getMessage());
+            throw new Exception('Ошибка при удалении студента.');
         }
     }
 }
