@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\OneToMany;
+use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\Mapping\SequenceGenerator;
 use Doctrine\ORM\Mapping\Table;
 use Exception;
@@ -42,6 +43,7 @@ class GroupEntity
 
     /** @var Collection<int, StudentEntity> An ArrayCollection of StudentEntity objects. */
     #[OneToMany(targetEntity: StudentEntity::class, mappedBy: 'group')]
+    #[OrderBy(["lastName" => "ASC", "firstName" => "ASC", "patronymic" => "ASC"])]
     private Collection $students;
 
     public function __construct()
@@ -103,31 +105,6 @@ class GroupEntity
     {
         $this->students = $students;
         return $this;
-    }
-
-    /**
-     * Возвращает массив студентов в алфавитном порядке.
-     *
-     * @return array
-     */
-    public function getStudentsArray(): array
-    {
-        $result = [];
-
-        foreach ($this->getStudents() as $student) {
-            $result[] = StudentDto::formFromEntity($student);
-        }
-
-        usort($result, function ($student1, $student2) {
-            /** @var $student1 StudentDto */
-            /** @var $student2 StudentDto */
-
-            $cmpByLastName = strcmp($student1->lastName, $student2->lastName);
-
-            return $cmpByLastName == 0 ? strcmp($student1->firstName, $student2->firstName) : $cmpByLastName;
-        });
-
-        return $result;
     }
 
     /**

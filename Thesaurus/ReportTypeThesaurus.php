@@ -4,6 +4,6 @@ namespace app\Thesaurus;
 
 enum ReportTypeThesaurus: int
 {
-    case pdf = 1;
-    case excel = 2;
+    case Pdf = 1;
+    case Excel = 2;
 }

@@ -20,7 +20,7 @@ class ReportController
      * @return void
      * @throws Exception
      */
-    function download(array $params)
+    function download(array $params): void
     {
         $this->facade->download($params['reportType']);
     }

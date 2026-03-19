@@ -8,17 +8,12 @@ use Dotenv\Dotenv;
 use Knp\Snappy\Pdf;
 use Monolog\Handler\FirePHPHandler;
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use Monolog\Logger;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 require_once __DIR__ . '/vendor/autoload.php';
-
-$shutdownFunction = function () {
-    echo error_get_last()['message'] ?? 'Нет сообщения';
-};
-
-register_shutdown_function($shutdownFunction);
 
 $proxyDir = __DIR__ . '/var/cache';
 
@@ -61,13 +56,25 @@ Container::set(Logger::class, $logger);
 
 $loader = new FilesystemLoader('./Templates');
 $twig = new Environment($loader, [
-   // 'cache' => '/var/cache/test2_cache',
+    // 'cache' => '/var/cache/test2_cache',
 
 ]);
 
 Container::set(Environment::class, $twig);
 
 Container::set(Pdf::class, new Pdf('/usr/bin/wkhtmltopdf'));
+
+$shutdownFunction = function () {
+    $logger = Container::get(Logger::class);
+
+    $error = error_get_last();
+
+    if (!is_null($error)) {
+        $logger->log(Level::Error, $error['message'] ?? 'Нет сообщения');
+    }
+};
+
+register_shutdown_function($shutdownFunction);
 
 /**
  * Возвращает строку, отформатированную, как имя собственное.
@@ -114,12 +121,16 @@ function echoJson(array $objects): void
  *
  * @param string $error
  * @param int $code
- * @return void
+ * @return never
  */
-function throwServerError(string $error, int $code = 500): void
+function throwServerError(string $error, int $code = 500): never
 {
     http_response_code($code);
-    echo $error;
+
+    header("Content-type: application/json");
+    echo json_encode(['errorCode' => $code, 'message' => $error]);
+
+    exit();
 }
 
 //todo Undefined array key "group"

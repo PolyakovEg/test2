@@ -30,7 +30,13 @@ class GroupService
     public function get(GroupFilterDto $dto = null): array
     {
         $entities = $this->entityManager->getRepository(GroupEntity::class)->getGroupsByDto($dto);
-        return GroupDto::formFromArray($entities);
+        $groupDto = GroupDto::formFromArray($entities);
+
+        foreach ($groupDto as $group) {
+            $group->students = StudentDto::formFromArray($group->students);
+        }
+
+        return $groupDto;
     }
 
     /**
@@ -79,8 +85,9 @@ class GroupService
      */
     public function getStudents(int $id): array
     {
-        $entity = $this->entityManager->getRepository(GroupEntity::class)->find($id);
-        return StudentDto::formFromArray($entity->getStudents()->toArray());
+        $repository = $this->entityManager->getRepository(GroupEntity::class);
+        $entity = $repository->find($id);
+        return StudentDto::formFromArray($repository->getStudents($entity));
     }
 
     /**

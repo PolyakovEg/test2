@@ -3,7 +3,6 @@
 namespace app\Dto;
 
 use app\Entity\GroupEntity;
-use DateTime;
 use Exception;
 
 class GroupDto
@@ -43,12 +42,13 @@ class GroupDto
     public static function formFromEntity(GroupEntity $group): self
     {
         $dto = new GroupDto();
+
         $dto->id = $group->getId();
         $dto->name = $group->getName();
         $dto->studyStartDate = date_format($group->getStudyStartDate(), 'd.m.Y') ?: null;
         $dto->specializationId = $group->getSpecializationId();
         $dto->formOfEducation = $group->getFormOfEducation();
-        $dto->students = $group->getStudentsArray();
+        $dto->students = $group->getStudents()->toArray();
 
         return $dto;
     }

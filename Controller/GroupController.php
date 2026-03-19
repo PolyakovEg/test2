@@ -37,7 +37,6 @@ class GroupController
     public function save(array $params): void
     {
         $dto = DtoBuilder::formFromRequest(GroupDto::class, $params);
-
         $this->facade->save($dto);
     }
 

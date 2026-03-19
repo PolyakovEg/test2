@@ -3,7 +3,9 @@
 namespace app\Repository;
 
 use app\Dto\GroupFilterDto;
+use app\Dto\StudentDto;
 use app\Entity\GroupEntity;
+use app\Entity\StudentEntity;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityRepository;
@@ -18,7 +20,7 @@ class GroupEntityRepository extends EntityRepository
      * @return mixed
      * @throws Exception
      */
-    public function getGroupsByDto(GroupFilterDto $dto = null)
+    public function getGroupsByDto(?GroupFilterDto $dto = null): mixed
     {
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
         $queryBuilder
@@ -33,8 +35,8 @@ class GroupEntityRepository extends EntityRepository
             }
 
             if (isset($dto->name)) {
-                $queryBuilder->andWhere('g.name = :name');
-                $queryBuilder->setParameter('name', $dto->name);
+                $queryBuilder->andWhere('g.name LIKE :name');
+                $queryBuilder->setParameter('name', "%$dto->name%");
             }
 
             if (isset($dto->studyStartDate)) {
@@ -52,6 +54,28 @@ class GroupEntityRepository extends EntityRepository
                 $queryBuilder->setParameter('specializationId', $dto->specializationId);
             }
         }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * Возвращает список студентов группы.
+     *
+     * @param GroupEntity $entity
+     * @return array
+     */
+    public function getStudents(GroupEntity $entity): mixed
+    {
+        $queryBuilder = $this->getEntityManager()->createQueryBuilder();
+        $queryBuilder
+            ->select('s')
+            ->from(StudentEntity::class, 's')
+            ->where('s.group = :group')
+            ->orderBy('s.lastName', 'ASC')
+            ->addOrderBy('s.firstName')
+            ->addOrderBy('s.patronymic');
+
+        $queryBuilder->setParameter('group', $entity);
 
         return $queryBuilder->getQuery()->getResult();
     }
