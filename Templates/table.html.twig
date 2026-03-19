@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<meta charset="UTF-8">
+<head>
+    <title>Таблица групп и студентов</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 1px solid black;
+            /* Градиент по всей таблице */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+            /* Полупрозрачный фон для ячеек */
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        th {
+            /* Градиент для заголовка */
+            background: linear-gradient(180deg, #667eea 0%, #5a67d8 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) td {
+            /* Чередование строк */
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        tr:nth-child(odd) td {
+            background: rgba(255, 255, 255, 0.85);
+        }
+    </style>
+</head>
+
+<body>
+<table>
+    <tr>
+        <th>Группа</th>
+        <th>Номер по списку</th>
+        <th>ФИО</th>
+        <th>Почта</th>
+        <th>Общежитие</th>
+    </tr>
+
+    {% for group in groups %}
+        {% if group.students | length > 0 %}
+            <tr>
+            <td rowspan="{{ group.students | length }}">
+                {{ group.name }}
+            </td>
+            {% for student in group.students %}
+                <td>
+                    {{ loop.index }}
+                </td>
+                <td>
+                    {{ student.lastName }} {{ student.firstName }} {{ student.patronymic }}
+                </td>
+                <td>
+                    {{ student.email }}
+                </td>
+                <td style="text-align: center;">
+                    {% if student.isLiveInDormitory == 1 %}
+                        Да
+                    {% elseif student.isLiveInDormitory == 0 %}
+                        Нет
+                    {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+</table>
+</body>
+</html>
